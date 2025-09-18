@@ -44,5 +44,10 @@ namespace Common.Samples
             WindAngle = wa;
             Time = time;
         }
+
+        public override string ToString()
+        {
+            return $"{LinearAccelarationX},{LinearAccelarationY},{LinearAccelarationZ},{WindSpeed},{WindAngle},{Time.ToString("dd/MM/yyyy HH:mm:ss")}";
+        }
     }
 }

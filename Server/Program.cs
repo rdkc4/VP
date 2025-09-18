@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Server.Services.Session;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Common.Services.Session;
-using Common.Results;
+using System.ServiceModel;
 
 namespace Server
 {
@@ -12,6 +12,12 @@ namespace Server
     {
         static void Main(string[] args)
         {
+            ServiceHost host = new ServiceHost(typeof(ServiceContract));
+            host.Open();
+
+            Console.WriteLine("Service is running. Press any key to stop...");
+            Console.ReadKey();
+            host.Close();
         }
     }
 }
