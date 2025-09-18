@@ -50,6 +50,7 @@
     <Compile Include="Services\Data\IDataAssembler.cs" />
     <Compile Include="Services\Data\IDataReader.cs" />
     <Compile Include="Services\Data\IDataWriter.cs" />
+    <Compile Include="Services\Logger\ILogger.cs" />
     <Compile Include="Services\Session\IServiceContract.cs" />
     <Compile Include="Services\Validator\IDroneSampleValidator.cs" />
   </ItemGroup>

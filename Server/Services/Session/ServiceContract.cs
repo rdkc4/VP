@@ -45,16 +45,13 @@ namespace Server.Services.Session
             ValidationResult validationResult = droneSampleValidator.validate(droneSample);
             try
             {
-                Console.WriteLine("recv");
                 if (validationResult.Success)
                 {
-                    Console.WriteLine($"valid {droneSample}");
                     dataWriter.WriteValidData(droneSample.ToString());
                     return new OperationResult(true, "");
                 }
                 else
                 {
-                    Console.WriteLine($"reject {droneSample}");
                     dataWriter.WriteRejectedData(droneSample.ToString());
                     return new OperationResult(false, validationResult.Message);
                 }
