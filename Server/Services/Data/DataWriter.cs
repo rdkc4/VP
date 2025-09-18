@@ -21,6 +21,8 @@ namespace Server.Services.Data
         private StreamWriter validWriter = null;
         private StreamWriter rejectWriter = null;
 
+        private bool disposed = false;
+        
         public OperationResult Init()
         {
             try
@@ -95,6 +97,8 @@ namespace Server.Services.Data
 
         protected virtual void Dispose(bool disposing)
         {
+            if (disposed) return;
+
             if (disposing)
             {
                 if (validWriter != null)
@@ -109,6 +113,7 @@ namespace Server.Services.Data
                     rejectWriter = null;
                 }
             }
+            disposed = true;
         }
     }
 }

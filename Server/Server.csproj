@@ -48,8 +48,10 @@
     <Compile Include="Exceptions\DataWriterException.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\Analyzer\TelemetryAnalyzer.cs" />
     <Compile Include="Services\Data\DataWriter.cs" />
-    <Compile Include="Services\Session\ServiceContract.cs" />
+    <Compile Include="Services\EventListener\DroneServiceEventListener.cs" />
+    <Compile Include="Services\Session\DroneService.cs" />
     <Compile Include="Services\Validator\DroneSampleValidator.cs" />
   </ItemGroup>
   <ItemGroup>

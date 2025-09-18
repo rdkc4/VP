@@ -12,7 +12,7 @@ namespace Server
     {
         static void Main(string[] args)
         {
-            ServiceHost host = new ServiceHost(typeof(ServiceContract));
+            ServiceHost host = new ServiceHost(typeof(DroneService));
             host.Open();
 
             Console.WriteLine("Service is running. Press any key to stop...");

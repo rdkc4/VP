@@ -12,6 +12,7 @@ namespace Client.Services.Data
     internal class DataReader : IDataReader
     {
         private StreamReader dataReader;
+        private bool disposed = false;
 
         public DataReader(string path)
         {
@@ -48,11 +49,14 @@ namespace Client.Services.Data
 
         protected virtual void Dispose(bool disposing)
         {
+            if (disposed) return;
+
             if (disposing)
             {
                 dataReader?.Dispose();
                 dataReader = null;
             }
+            disposed = true;
         }
     }
 }

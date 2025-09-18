@@ -9,8 +9,8 @@ using Common.Samples;
 
 namespace Common.Services.Session
 {
-    [ServiceContract]
-    public interface IServiceContract
+    [ServiceContract(CallbackContract = typeof(IDroneServiceCallback))]
+    public interface IDroneService
     {
         [OperationContract]
         OperationResult StartSession(string meta);

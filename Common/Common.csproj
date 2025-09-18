@@ -43,6 +43,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Events\SampleReceivedEventArgs.cs" />
+    <Compile Include="Events\TransferEventArgs.cs" />
+    <Compile Include="Events\WarningEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Results\OperationResult.cs" />
     <Compile Include="Results\ValidationResult.cs" />
@@ -51,7 +54,9 @@
     <Compile Include="Services\Data\IDataReader.cs" />
     <Compile Include="Services\Data\IDataWriter.cs" />
     <Compile Include="Services\Logger\ILogger.cs" />
-    <Compile Include="Services\Session\IServiceContract.cs" />
+    <Compile Include="Services\Session\IClientService.cs" />
+    <Compile Include="Services\Session\IDroneService.cs" />
+    <Compile Include="Services\Session\IDroneServiceCallback.cs" />
     <Compile Include="Services\Validator\IDroneSampleValidator.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
