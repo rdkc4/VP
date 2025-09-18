@@ -24,17 +24,32 @@ namespace Server.Services.Session
         private readonly IDataWriter dataWriter = new DataWriter();
         private readonly IDroneSampleValidator droneSampleValidator = new DroneSampleValidator();
 
+        private IClientChannel clientChannel;
+        private bool sessionActive = false;
+        private bool sessionDisposed = false;
+
         private DroneServiceEventListener eventListener;
 
         public static event EventHandler<TransferEventArgs> OnTransferStarted;
         public static event EventHandler<TransferEventArgs> OnTransferCompleted;
         public static event EventHandler<SampleReceivedEventArgs> OnSampleReceived;
         public static event EventHandler<WarningEventArgs> OnWarningRaised;
-        
+
         public OperationResult StartSession(string meta)
         {
             eventListener = new DroneServiceEventListener();
             OnTransferStarted?.Invoke(this, new TransferEventArgs("Transfer Started"));
+
+            sessionActive = true;
+            sessionDisposed = false;
+
+            clientChannel = OperationContext.Current.GetCallbackChannel<IClientChannel>();
+            if (clientChannel is ICommunicationObject channel)
+            {
+                channel.Faulted += (sender, e) => { sessionActive = false; EndSession(); };
+                channel.Closed += (sender, e) => { sessionActive = false; EndSession(); };
+            }
+
             try
             {
                 var initResult = dataWriter.Init();
@@ -84,9 +99,23 @@ namespace Server.Services.Session
 
         public void EndSession()
         {
+            if (sessionDisposed) return;
+
+            if (sessionActive)
+            {
+                OnTransferCompleted?.Invoke(this, new TransferEventArgs("Transfer Completed"));
+            }
+            else
+            {
+                Console.WriteLine("[Data Transfer]: Transfer Canceled");
+            }
+
             dataWriter?.Dispose();
-            OnTransferCompleted?.Invoke(this, new TransferEventArgs("Transfer Completed"));
             eventListener?.Dispose();
+
+            sessionDisposed = true;
+            sessionActive = false;
         }
+
     }
 }

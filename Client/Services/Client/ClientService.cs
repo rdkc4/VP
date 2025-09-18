@@ -24,6 +24,7 @@ namespace Client.Services.Client
         private IDataAssembler dataAssembler;
 
         private bool disposed = false;
+        private bool serverActive = false;
 
         public void OnTransferStarted(string message)
         {
@@ -72,6 +73,21 @@ namespace Client.Services.Client
             var instanceContext = new InstanceContext(this);
             channelFactory = new DuplexChannelFactory<IDroneService>(instanceContext, "DroneService");
             service = channelFactory.CreateChannel();
+            serverActive = true;
+
+            if(service is ICommunicationObject serverChannel)
+            {
+                serverChannel.Faulted += (sender, e) =>
+                {
+                    serverActive = false;
+                    logger?.Log(_event: "Server Connection", message: "The server connection has faulted");
+                };
+                serverChannel.Closed += (sender, e) =>
+                {
+                    serverActive = false;
+                    logger?.Log(_event: "Server Connection", message: "Server connection closed");
+                };
+            }
 
             const string datasetPath = @"./../../../Dataset/drone_dataset.csv";
             dataReader = new DataReader(datasetPath);
@@ -96,14 +112,22 @@ namespace Client.Services.Client
             double previousTime = 0d;
             string line;
 
-            while ((line = dataReader.ReadSample()) != null)
+            while ((line = dataReader.ReadSample()) != null && serverActive)
             {
                 DroneSample droneSample = dataAssembler.AssembleDroneSample(line, out double time);
                 if (droneSample != null && row < 100)
                 {
-                    service.PushSample(droneSample);
-                    Thread.Sleep((int)((time - previousTime) * 5000));
-                    previousTime = time;
+                    try
+                    {
+                        service.PushSample(droneSample);
+                        Thread.Sleep((int)((time - previousTime) * 1000));
+                        previousTime = time;
+                    }
+                    catch
+                    {
+                        logger?.Log(_event: "Communication Error", message: "Server disconnected");
+                        break;
+                    }
                 }
                 else if (droneSample != null)
                 {
@@ -136,9 +160,28 @@ namespace Client.Services.Client
 
             if (disposing)
             {
-                service?.EndSession();
-                channelFactory?.Close();
+                try
+                {
+                    if (serverActive)
+                    {
+                       service?.EndSession();
+                    }
+
+                    if (channelFactory?.State == CommunicationState.Opened)
+                    {
+                        channelFactory.Close();
+                    }
+                    else
+                    {
+                        channelFactory?.Abort();
+                    }
+                }
+                catch
+                {
+                    logger?.Log("Client", "Server has already disconnected");
+                }
                 dataReader?.Dispose();
+                logger?.Dispose();
             }
 
             disposed = true;
