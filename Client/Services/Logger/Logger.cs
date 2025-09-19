@@ -1,21 +1,30 @@
 ﻿using Common.Services.Logger;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Client.Services.Log
 {
     internal class Logger : ILogger
     {
         private StreamWriter logger;
+        private StreamWriter eventLogger;
+        private StreamWriter leftoverLogger;
+
         private bool disposed = false;
 
-        public Logger(string directory, string fileName)
+        public Logger(string directory, string logFile, string eventFile, string leftoverFile)
         {
-            logger = new StreamWriter(Path.Combine(directory, fileName), append: true)
+            logger = new StreamWriter(Path.Combine(directory, logFile), append: true)
+            {
+                AutoFlush = true
+            };
+
+            eventLogger = new StreamWriter(Path.Combine(directory, eventFile), append: true)
+            {
+                AutoFlush = true
+            };
+
+            leftoverLogger = new StreamWriter(Path.Combine(directory, leftoverFile), append: true)
             {
                 AutoFlush = true
             };
@@ -25,7 +34,31 @@ namespace Client.Services.Log
         {
             try
             {
-                logger.WriteLine($"[{DateTime.Now:dd/MM/yyyy HH:mm:ss}] [{_event}]: {message}");
+                logger.WriteLine($"[{DateTime.Now:dd/MM/yyyy HH:mm:ss:fff}] [{_event}]: {message}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to write log: {ex.Message}");
+            }
+        }
+
+        public void LogEvent(string _event, string message)
+        {
+            try
+            {
+                eventLogger.WriteLine($"[{DateTime.Now:dd/MM/yyyy HH:mm:ss:fff}] [{_event}]: {message}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to write log: {ex.Message}");
+            }
+        }
+
+        public void LogLeftover(string _event, string message)
+        {
+            try
+            {
+                leftoverLogger.WriteLine($"[{DateTime.Now:dd/MM/yyyy HH:mm:ss:fff}] [{_event}]: {message}");
             }
             catch (Exception ex)
             {
@@ -50,8 +83,24 @@ namespace Client.Services.Log
 
             if (disposing)
             {
-                logger?.Dispose();
-                logger = null;
+                if (logger != null)
+                {
+                    logger.Dispose();
+                    logger = null;
+                }
+
+                if (eventLogger != null)
+                {
+                    eventLogger.Dispose();
+                    eventLogger = null;
+                }
+
+                if (leftoverLogger != null)
+                {
+                    leftoverLogger.Dispose();
+                    leftoverLogger = null;
+                }
+
             }
             disposed = true;
         }

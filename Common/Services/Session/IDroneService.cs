@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.ServiceModel;
-using Common.Results;
+﻿using Common.Results;
 using Common.Samples;
+using System.ServiceModel;
 
 namespace Common.Services.Session
 {
     [ServiceContract(CallbackContract = typeof(IDroneServiceCallback))]
-    public interface IDroneService
+    public interface IDroneService : IDroneEvents
     {
         [OperationContract]
         OperationResult StartSession(string meta);

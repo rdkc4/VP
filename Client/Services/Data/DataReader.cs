@@ -1,11 +1,7 @@
 ﻿using Client.Exceptions;
 using Common.Services.Data;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Client.Services.Data
 {
@@ -36,7 +32,7 @@ namespace Client.Services.Data
             }
         }
 
-        ~DataReader() 
+        ~DataReader()
         {
             Dispose(false);
         }

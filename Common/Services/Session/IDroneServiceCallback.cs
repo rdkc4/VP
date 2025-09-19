@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.ServiceModel;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ServiceModel;
 
 namespace Common.Services.Session
 {
@@ -21,5 +16,14 @@ namespace Common.Services.Session
 
         [OperationContract(IsOneWay = true)]
         void OnWarningRaised(string message);
+
+        [OperationContract(IsOneWay = true)]
+        void OnAccelerationSpike(string message);
+
+        [OperationContract(IsOneWay = true)]
+        void OnOutOfBandWarning(string message);
+
+        [OperationContract(IsOneWay = true)]
+        void OnWindSpike(string message);
     }
 }

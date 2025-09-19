@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Runtime.Serialization;
 
 namespace Common.Samples
@@ -19,19 +15,19 @@ namespace Common.Samples
 
         [DataMember]
         public double LinearAccelarationX { get => linearAccelarationX; set => linearAccelarationX = value; }
-        
+
         [DataMember]
         public double LinearAccelarationY { get => linearAccelarationY; set => linearAccelarationY = value; }
-        
+
         [DataMember]
         public double LinearAccelarationZ { get => linearAccelarationZ; set => linearAccelarationZ = value; }
-        
+
         [DataMember]
-        public double WindSpeed { get => windSpeed; set => windSpeed = value;}
-        
+        public double WindSpeed { get => windSpeed; set => windSpeed = value; }
+
         [DataMember]
         public double WindAngle { get => windAngle; set => windAngle = value; }
-        
+
         [DataMember]
         public DateTime Time { get => time; set => time = value; }
 
@@ -47,7 +43,7 @@ namespace Common.Samples
 
         public override string ToString()
         {
-            return $"{LinearAccelarationX},{LinearAccelarationY},{LinearAccelarationZ},{WindSpeed},{WindAngle},{Time.ToString("dd/MM/yyyy HH:mm:ss")}";
+            return $"{LinearAccelarationX},{LinearAccelarationY},{LinearAccelarationZ},{WindSpeed},{WindAngle},{Time:dd/MM/yyyy HH:mm:ss:fff}";
         }
     }
 }

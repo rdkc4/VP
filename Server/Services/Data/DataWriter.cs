@@ -1,28 +1,23 @@
 ﻿using Common.Results;
-using Common.Samples;
 using Common.Services.Data;
 using Server.Exceptions;
 using System;
-using System.CodeDom;
-using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Server.Services.Data
 {
     internal class DataWriter : IDataWriter
     {
-        private const string PROCESSED_DIR_PATH = "./../../ProcessedData";
-        private const string VALID_FILE_NAME = "measurements_session.csv";
-        private const string REJECT_FILE_NAME = "rejects.csv";
+        private readonly string PROCESSED_DIR_PATH = ConfigurationManager.AppSettings["ProcessedDataDir"] ?? "./../../ProcessedData";
+        private readonly string VALID_FILE_NAME = ConfigurationManager.AppSettings["ValidSampleFile"] ?? "measurements_session";
+        private readonly string REJECT_FILE_NAME = ConfigurationManager.AppSettings["RejectSampleFile"] ?? "rejects.csv";
 
         private StreamWriter validWriter = null;
         private StreamWriter rejectWriter = null;
 
         private bool disposed = false;
-        
+
         public OperationResult Init()
         {
             try
@@ -86,7 +81,7 @@ namespace Server.Services.Data
 
         ~DataWriter()
         {
-           Dispose(false);
+            Dispose(false);
         }
 
         public void Dispose()
