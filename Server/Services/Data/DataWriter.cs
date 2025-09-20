@@ -9,9 +9,9 @@ namespace Server.Services.Data
 {
     internal class DataWriter : IDataWriter
     {
-        private readonly string PROCESSED_DIR_PATH = ConfigurationManager.AppSettings["ProcessedDataDir"] ?? "./../../ProcessedData";
-        private readonly string VALID_FILE_NAME = ConfigurationManager.AppSettings["ValidSampleFile"] ?? "measurements_session";
-        private readonly string REJECT_FILE_NAME = ConfigurationManager.AppSettings["RejectSampleFile"] ?? "rejects.csv";
+        private readonly string PROCESSED_DIR_PATH = ConfigurationManager.AppSettings["ProcessedDataDirectoryPath"] ?? "./../../ProcessedData";
+        private readonly string VALID_FILE_NAME = ConfigurationManager.AppSettings["ValidSampleFileName"] ?? "measurements_session";
+        private readonly string REJECT_FILE_NAME = ConfigurationManager.AppSettings["RejectSampleFileName"] ?? "rejects.csv";
 
         private StreamWriter validWriter = null;
         private StreamWriter rejectWriter = null;

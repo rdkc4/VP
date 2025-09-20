@@ -34,7 +34,7 @@ namespace Client.Services.Client
         public ClientService()
         {
             datasetPath = ConfigurationManager.AppSettings["DatasetPath"] ?? "./../../../Dataset/drone_dataset.csv";
-            logDirectoryPath = ConfigurationManager.AppSettings["LogsDirectory"] ?? "./../../Logs";
+            logDirectoryPath = ConfigurationManager.AppSettings["LogsDirectoryPath"] ?? "./../../Logs";
             logFileName = ConfigurationManager.AppSettings["DroneLogsFileName"] ?? "drone_logs.txt";
             eventFileName = ConfigurationManager.AppSettings["EventLogsFileName"] ?? "event_logs.txt";
             leftoverFileName = ConfigurationManager.AppSettings["LeftoverLogsFileName"] ?? "leftover_logs.txt";
