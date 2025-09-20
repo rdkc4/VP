@@ -1,4 +1,5 @@
-﻿using Common.Results;
+﻿using System;
+using Common.Results;
 using Common.Samples;
 using Common.Services.Validator;
 
@@ -8,6 +9,7 @@ namespace Server.Services.Validator
     {
         public ValidationResult Validate(DroneSample droneSample)
         {
+            Console.WriteLine("[Processing]: Data validation...");
             if (droneSample == null)
             {
                 return new ValidationResult(false, "Drone sample not provided");

@@ -79,7 +79,7 @@ namespace Server.Services.Session
         {
             OnSampleReceived?.Invoke(this, new SampleReceivedEventArgs($"{droneSample}"));
 
-            Console.WriteLine("[Processing]: Started");
+            Console.WriteLine("[Processing]: Starting...");
             ValidationResult validationResult = droneSampleValidator.Validate(droneSample);
             try
             {

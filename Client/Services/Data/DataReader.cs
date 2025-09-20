@@ -45,6 +45,8 @@ namespace Client.Services.Data
 
         protected virtual void Dispose(bool disposing)
         {
+            Console.WriteLine("[Data Reader]: Disposing...");
+
             if (disposed) return;
 
             if (disposing)

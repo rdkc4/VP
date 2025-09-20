@@ -14,17 +14,17 @@ namespace Client.Services.Log
 
         public Logger(string directory, string logFile, string eventFile, string leftoverFile)
         {
-            logger = new StreamWriter(Path.Combine(directory, logFile), append: true)
+            logger = new StreamWriter(Path.Combine(directory, logFile))
             {
                 AutoFlush = true
             };
 
-            eventLogger = new StreamWriter(Path.Combine(directory, eventFile), append: true)
+            eventLogger = new StreamWriter(Path.Combine(directory, eventFile))
             {
                 AutoFlush = true
             };
 
-            leftoverLogger = new StreamWriter(Path.Combine(directory, leftoverFile), append: true)
+            leftoverLogger = new StreamWriter(Path.Combine(directory, leftoverFile))
             {
                 AutoFlush = true
             };
@@ -79,6 +79,7 @@ namespace Client.Services.Log
 
         protected virtual void Dispose(bool disposing)
         {
+            Console.WriteLine("[Logger]: Disposing...");
             if (disposed) return;
 
             if (disposing)

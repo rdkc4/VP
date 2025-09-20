@@ -16,8 +16,7 @@ namespace Server.Services.Analyzer
         private double Wmean;
         private double WmeanCounter;
 
-        private const double defaultA_threshold = 0.02;
-        private const double defaultW_threshold = 0.1;
+        private readonly double deviation_threshold;
 
         private readonly Action<AccelerationSpikeEventArgs> onAccelerationSpike;
         private readonly Action<OutOfBandWarningEventArgs> onOutOfBandWarning;
@@ -32,11 +31,19 @@ namespace Server.Services.Analyzer
             Wmean = 0;
             WmeanCounter = 0;
 
-            bool success = Double.TryParse(ConfigurationManager.AppSettings["A_threshold"], out double tempCfgThreshold);
-            A_threshold = success ? tempCfgThreshold : defaultA_threshold;
+            if(!Double.TryParse(ConfigurationManager.AppSettings["A_threshold"], out A_threshold)){
+                A_threshold = 0.02;
+            }
 
-            success = Double.TryParse(ConfigurationManager.AppSettings["W_threshold"], out tempCfgThreshold);
-            W_threshold = success ? tempCfgThreshold : defaultW_threshold;
+            if(!Double.TryParse(ConfigurationManager.AppSettings["W_threshold"], out W_threshold))
+            {
+                W_threshold = 0.1;
+            }
+
+            if(!Double.TryParse(ConfigurationManager.AppSettings["Deviation_threshold"], out deviation_threshold))
+            {
+                deviation_threshold = 25d;
+            }
 
             onAccelerationSpike = onASpike;
             onOutOfBandWarning = onOutOfBand;
@@ -45,6 +52,7 @@ namespace Server.Services.Analyzer
 
         public void DetectAccelerationAnomaly(double laX, double laY, double laZ)
         {
+            Console.WriteLine("[Processing]: Acceleration checking...");
             double A_norm = Math.Sqrt(Math.Pow(laX, 2) + Math.Pow(laY, 2) + Math.Pow(laZ, 2));
             double deltaA = A_norm - prevA_norm;
 
@@ -53,8 +61,8 @@ namespace Server.Services.Analyzer
                 string direction = A_norm < prevA_norm ? "below" : "above";
                 onAccelerationSpike?.Invoke(
                     new AccelerationSpikeEventArgs(
-                        $"Acceleration spike detected: {A_norm} m/s²",
-                        $"Acceleration is {direction} the threshold of {A_threshold} m/s²"
+                        $"Acceleration spike detected: {A_norm:F4} m/s²",
+                        $"Acceleration is {direction} the threshold of {A_threshold:F4} m/s²"
                     )
                 );
             }
@@ -62,13 +70,15 @@ namespace Server.Services.Analyzer
             ++AmeanCounter;
             Amean += (A_norm - Amean) / AmeanCounter;
 
-            if (A_norm < 0.75 * Amean || A_norm > 1.25 * Amean)
+            double lowerBound = (100d - deviation_threshold) / 100 * Amean;
+            double upperBound = (100d + deviation_threshold) / 100 * Amean;
+            if (A_norm < lowerBound || A_norm > upperBound)
             {
-                string direction = A_norm < 0.75 * Amean ? "below" : "above";
+                string direction = A_norm < lowerBound ? "below" : "above";
                 onOutOfBandWarning?.Invoke(
                     new OutOfBandWarningEventArgs(
                         $"Out-of-band acceleration detected: {A_norm} m/s²",
-                        $"Acceleration is 25% {direction} the mean {Amean} m/s²"
+                        $"Acceleration is more than {deviation_threshold:F4}% {direction} the mean {Amean:F4} m/s²"
                     )
                 );
             }
@@ -78,14 +88,15 @@ namespace Server.Services.Analyzer
 
         public void DetectWindSpikes(double windSpeed, double windAngle)
         {
+            Console.WriteLine("[Processing]: Checking wind spikes...");
             double Weffect = Math.Abs(windSpeed * Math.Sin(windAngle));
             if (Weffect > W_threshold)
             {
                 string direction = WmeanCounter > 0 && Weffect < Wmean ? "below" : "above";
                 onWindSpike?.Invoke(
                     new WindSpikeEventArgs(
-                        $"Wind spike detected: {Weffect} m/s, threshold: {W_threshold} m/s",
-                        $"Wind speed is {direction} the mean of {Wmean} m/s"
+                        $"Wind spike detected: {Weffect:F4} m/s, threshold: {W_threshold:F4} m/s",
+                        $"Wind speed is {direction:F4} the mean of {Wmean:F4} m/s"
                     )
                 );
             }

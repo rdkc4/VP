@@ -92,6 +92,7 @@ namespace Server.Services.Data
 
         protected virtual void Dispose(bool disposing)
         {
+            Console.WriteLine("[Data Writer]: Disposing...");
             if (disposed) return;
 
             if (disposing)

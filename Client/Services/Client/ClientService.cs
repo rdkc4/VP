@@ -96,12 +96,12 @@ namespace Client.Services.Client
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Client Error: {ex.Message}");
+                Console.WriteLine($"[Client Error]: {ex.Message}");
                 logger?.LogEvent(_event: "Client Error", message: ex.Message);
             }
             finally
             {
-                Dispose(true);
+                Dispose();
             }
         }
 
@@ -149,10 +149,10 @@ namespace Client.Services.Client
             double previousTime = 0d;
             string line;
 
-            while ((line = dataReader.ReadSample()) != null && serverActive)
+            while ((line = dataReader.ReadSample()) != null && row < rowLimit)
             {
                 DroneSample droneSample = dataAssembler.AssembleDroneSample(line, out double time);
-                if (droneSample != null && row < rowLimit)
+                if (droneSample != null)
                 {
                     try
                     {
@@ -178,10 +178,23 @@ namespace Client.Services.Client
                         break;
                     }
                 }
-                else if (droneSample != null)
+                else
+                {
+                    logger?.Log(_event: "Invalid Drone Sample", message: $"Row {row + 1} was skipped");
+                }
+                ++row;
+            }
+
+            service?.EndSession();
+            serverActive = false;
+
+            while ((line = dataReader.ReadSample()) != null)
+            {
+                DroneSample droneSample = dataAssembler.AssembleDroneSample(line, out double time);
+                if (droneSample != null)
                 {
                     Console.WriteLine($"[Leftover Drone Sample]: {droneSample}");
-                    logger.LogLeftover(_event: "Leftover Drone Sample", message: $"{droneSample}");
+                    logger?.LogLeftover(_event: "Leftover Drone Sample", message: $"{droneSample}");
 
                     int delay = (int)(Math.Max(0d, time - previousTime) * 1000);
                     Thread.Sleep(delay);
@@ -189,7 +202,8 @@ namespace Client.Services.Client
                 }
                 else
                 {
-                    logger.Log(_event: "Invalid Drone Sample", message: $"Row {row + 1} was skipped");
+                    Console.WriteLine($"[Invalid Drone Sample]: Row {row + 1} was skipped");
+                    logger?.LogEvent(_event: "Invalid Drone Sample", message: $"Row {row + 1} was skipped");
                 }
                 ++row;
             }
@@ -208,30 +222,16 @@ namespace Client.Services.Client
 
         protected virtual void Dispose(bool disposing)
         {
+            Console.WriteLine("[Client Service]: Disposing...");
             if (disposed) return;
 
             if (disposing)
             {
-                try
+                if (serverActive)
                 {
-                    if (serverActive)
-                    {
-                        service?.EndSession();
-                    }
+                    service?.EndSession();
+                }
 
-                    if (channelFactory?.State == CommunicationState.Opened)
-                    {
-                        channelFactory.Close();
-                    }
-                    else
-                    {
-                        channelFactory?.Abort();
-                    }
-                }
-                catch
-                {
-                    logger?.LogEvent("Client", "Server has already disconnected");
-                }
                 dataReader?.Dispose();
                 logger?.Dispose();
             }

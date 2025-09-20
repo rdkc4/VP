@@ -43,7 +43,7 @@ namespace Common.Samples
 
         public override string ToString()
         {
-            return $"{LinearAccelarationX},{LinearAccelarationY},{LinearAccelarationZ},{WindSpeed},{WindAngle},{Time:dd/MM/yyyy HH:mm:ss:fff}";
+            return $"{LinearAccelarationX:F4},{LinearAccelarationY:F4},{LinearAccelarationZ:F4},{WindSpeed:F4},{WindAngle:F4},{Time:dd/MM/yyyy HH:mm:ss:fff}";
         }
     }
 }

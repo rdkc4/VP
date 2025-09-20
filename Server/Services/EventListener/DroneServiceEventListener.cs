@@ -96,6 +96,7 @@ namespace Server.Services.EventListener
 
         protected virtual void Dispose(bool disposing)
         {
+            Console.WriteLine("[Drone Service Event Listener]: Disposing...");
             if (disposed) return;
 
             if (disposing)
