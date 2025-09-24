@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Server.Exceptions
+namespace Common.Exceptions
 {
     public class DataWriterException : Exception
     {

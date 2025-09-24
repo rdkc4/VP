@@ -1,4 +1,5 @@
 ﻿using Common.Events;
+using Common.Events.Drone;
 using Common.Services.Analyzer;
 using System;
 using System.Configuration;
@@ -18,11 +19,11 @@ namespace Server.Services.Analyzer
 
         private readonly double deviation_threshold;
 
-        private readonly Action<AccelerationSpikeEventArgs> onAccelerationSpike;
-        private readonly Action<OutOfBandWarningEventArgs> onOutOfBandWarning;
-        private readonly Action<WindSpikeEventArgs> onWindSpike;
+        private readonly Action<DroneEventArgs> onAccelerationSpike;
+        private readonly Action<DroneEventArgs> onOutOfBandWarning;
+        private readonly Action<DroneEventArgs> onWindSpike;
 
-        public TelemetryAnalyzer(Action<AccelerationSpikeEventArgs> onASpike, Action<OutOfBandWarningEventArgs> onOutOfBand, Action<WindSpikeEventArgs> onWSpike)
+        public TelemetryAnalyzer(Action<DroneEventArgs> onASpike, Action<DroneEventArgs> onOutOfBand, Action<DroneEventArgs> onWSpike)
         {
             prevA_norm = 0;
             Amean = 0;

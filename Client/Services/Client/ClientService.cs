@@ -1,4 +1,4 @@
-﻿using Client.Exceptions;
+﻿using Common.Exceptions;
 using Client.Services.Data;
 using Client.Services.Log;
 using Common.Samples;
@@ -15,11 +15,11 @@ namespace Client.Services.Client
 {
     public class ClientService : IClientService
     {
-        private readonly string datasetPath;
-        private readonly string logDirectoryPath;
-        private readonly string logFileName;
-        private readonly string eventFileName;
-        private readonly string leftoverFileName;
+        private readonly string datasetPath = ConfigurationManager.AppSettings["DatasetPath"] ?? "./../../../Dataset/drone_dataset.csv";
+        private readonly string logDirectoryPath = ConfigurationManager.AppSettings["LogsDirectoryPath"] ?? "./../../Logs";
+        private readonly string logFileName = ConfigurationManager.AppSettings["DroneLogsFileName"] ?? "drone_logs.txt";
+        private readonly string eventFileName = ConfigurationManager.AppSettings["EventLogsFileName"] ?? "event_logs.txt";
+        private readonly string leftoverFileName = ConfigurationManager.AppSettings["LeftoverLogsFileName"] ?? "leftover_logs.txt";
         private readonly int rowLimit;
 
         private DuplexChannelFactory<IDroneService> channelFactory;
@@ -28,17 +28,14 @@ namespace Client.Services.Client
         private ILogger logger;
         private IDataAssembler dataAssembler;
 
+        private bool initialized = false;
         private bool disposed = false;
         private bool serverActive = false;
 
+        private double previousTime = 0d;
+
         public ClientService()
         {
-            datasetPath = ConfigurationManager.AppSettings["DatasetPath"] ?? "./../../../Dataset/drone_dataset.csv";
-            logDirectoryPath = ConfigurationManager.AppSettings["LogsDirectoryPath"] ?? "./../../Logs";
-            logFileName = ConfigurationManager.AppSettings["DroneLogsFileName"] ?? "drone_logs.txt";
-            eventFileName = ConfigurationManager.AppSettings["EventLogsFileName"] ?? "event_logs.txt";
-            leftoverFileName = ConfigurationManager.AppSettings["LeftoverLogsFileName"] ?? "leftover_logs.txt";
-
             if (!int.TryParse(ConfigurationManager.AppSettings["RowLimit"], out rowLimit))
             {
                 rowLimit = 100;
@@ -91,17 +88,19 @@ namespace Client.Services.Client
         {
             try
             {
-                Init();
+                if (!initialized)
+                {
+                    Init();
+                }
+
+                StartSession();
                 SendData();
+                EndSession();
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"[Client Error]: {ex.Message}");
                 logger?.LogEvent(_event: "Client Error", message: ex.Message);
-            }
-            finally
-            {
-                Dispose();
             }
         }
 
@@ -117,12 +116,8 @@ namespace Client.Services.Client
                 serverChannel.Faulted += (sender, e) =>
                 {
                     serverActive = false;
+                    Console.WriteLine("[Server Connection]: The server connection has faulted");
                     logger?.LogEvent(_event: "Server Connection", message: "The server connection has faulted");
-                };
-                serverChannel.Closed += (sender, e) =>
-                {
-                    serverActive = false;
-                    logger?.LogEvent(_event: "Server Connection", message: "Server connection closed");
                 };
             }
 
@@ -136,6 +131,11 @@ namespace Client.Services.Client
             string header = dataReader.ReadSample();
             dataAssembler = new DataAssembler(header);
 
+            initialized = true;
+        }
+
+        private void StartSession()
+        {
             var result = service.StartSession(dataAssembler.GetMeta());
             if (!result.Success)
             {
@@ -146,7 +146,6 @@ namespace Client.Services.Client
         private void SendData()
         {
             int row = 0;
-            double previousTime = 0d;
             string line;
 
             while ((line = dataReader.ReadSample()) != null && row < rowLimit)
@@ -174,38 +173,25 @@ namespace Client.Services.Client
                     }
                     catch
                     {
+                        Console.WriteLine("[Communication Error]: Server disconnected");
                         logger?.LogEvent(_event: "Communication Error", message: "Server disconnected");
                         break;
                     }
                 }
                 else
                 {
+                    Console.WriteLine($"[Invalid Drone Sample]: Row {row + 1} was skipped");
                     logger?.Log(_event: "Invalid Drone Sample", message: $"Row {row + 1} was skipped");
                 }
                 ++row;
             }
+        }
 
-            service?.EndSession();
-            serverActive = false;
-
-            while ((line = dataReader.ReadSample()) != null)
+        private void EndSession()
+        {
+            if (serverActive)
             {
-                DroneSample droneSample = dataAssembler.AssembleDroneSample(line, out double time);
-                if (droneSample != null)
-                {
-                    Console.WriteLine($"[Leftover Drone Sample]: {droneSample}");
-                    logger?.LogLeftover(_event: "Leftover Drone Sample", message: $"{droneSample}");
-
-                    int delay = (int)(Math.Max(0d, time - previousTime) * 1000);
-                    Thread.Sleep(delay);
-                    previousTime = time;
-                }
-                else
-                {
-                    Console.WriteLine($"[Invalid Drone Sample]: Row {row + 1} was skipped");
-                    logger?.LogEvent(_event: "Invalid Drone Sample", message: $"Row {row + 1} was skipped");
-                }
-                ++row;
+                service?.EndSession();
             }
         }
 
@@ -227,11 +213,6 @@ namespace Client.Services.Client
 
             if (disposing)
             {
-                if (serverActive)
-                {
-                    service?.EndSession();
-                }
-
                 dataReader?.Dispose();
                 logger?.Dispose();
             }

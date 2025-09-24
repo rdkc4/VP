@@ -1,17 +1,18 @@
-﻿using Common.Events;
-using Common.Results;
+﻿using Common.Results;
 using Common.Samples;
+using Common.Events.Session;
 using Common.Services.Analyzer;
 using Common.Services.Data;
 using Common.Services.Session;
 using Common.Services.Validator;
+using Common.Exceptions;
 using Server.Services.Analyzer;
 using Server.Services.Data;
 using Server.Services.EventListener;
 using Server.Services.Validator;
 using System;
 using System.ServiceModel;
-
+using Common.Services.EventHandlers;
 
 namespace Server.Services.Session
 {
@@ -24,16 +25,18 @@ namespace Server.Services.Session
         private IClientChannel clientChannel;
         private bool sessionActive = false;
         private bool sessionDisposed = false;
+        private int sessionCounter = 0;
 
         private DroneServiceEventListener droneEventListener;
 
-        public event EventHandler<TransferEventArgs> OnTransferStarted;
-        public event EventHandler<TransferEventArgs> OnTransferCompleted;
-        public event EventHandler<SampleReceivedEventArgs> OnSampleReceived;
-        public event EventHandler<WarningEventArgs> OnWarningRaised;
-        public event EventHandler<AccelerationSpikeEventArgs> OnAccelerationSpike;
-        public event EventHandler<OutOfBandWarningEventArgs> OnOutOfBandWarning;
-        public event EventHandler<WindSpikeEventArgs> OnWindSpike;
+        public event SessionEventHandler OnTransferStarted;
+        public event SessionEventHandler OnTransferCompleted;
+        public event SessionEventHandler OnSampleReceived;
+        public event SessionEventHandler OnWarningRaised;
+
+        public event DroneEventHandler OnAccelerationSpike;
+        public event DroneEventHandler OnOutOfBandWarning;
+        public event DroneEventHandler OnWindSpike;
 
         public OperationResult StartSession(string meta)
         {
@@ -60,8 +63,8 @@ namespace Server.Services.Session
 
             try
             {
-                var initResult = dataWriter.Init();
-                if (initResult.Success)
+                var initResult = dataWriter.Init(append: sessionCounter > 0);
+                if (initResult.Success && sessionCounter == 0)
                 {
                     dataWriter.WriteValidData(meta);
                     dataWriter.WriteRejectedData(meta);
@@ -80,29 +83,40 @@ namespace Server.Services.Session
             OnSampleReceived?.Invoke(this, new SampleReceivedEventArgs($"{droneSample}"));
 
             Console.WriteLine("[Processing]: Starting...");
-            ValidationResult validationResult = droneSampleValidator.Validate(droneSample);
+
             try
             {
-                if (validationResult.Success)
+                droneSampleValidator.Validate(droneSample);
+            }
+            catch (InvalidSampleException sampleException)
+            {
+                Console.WriteLine($"[Processing error]: {sampleException.Message}");
+
+                try
                 {
-                    dataWriter.WriteValidData($"{droneSample}");
-
-                    telemetryAnalyzer.DetectAccelerationAnomaly(
-                        droneSample.LinearAccelarationX,
-                        droneSample.LinearAccelarationY,
-                        droneSample.LinearAccelarationZ
-                    );
-
-                    telemetryAnalyzer.DetectWindSpikes(droneSample.WindSpeed, droneSample.WindAngle);
-
-                    return new OperationResult(true, "");
-                }
-                else
-                {
-                    OnWarningRaised?.Invoke(this, new WarningEventArgs(validationResult.Message));
                     dataWriter.WriteRejectedData($"{droneSample}");
-                    return new OperationResult(false, validationResult.Message);
                 }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Processing error]: {ex.Message}");
+                    return new OperationResult(false, ex.Message);
+                }
+
+                return new OperationResult(false, sampleException.Message);
+            }
+
+            try
+            {
+                dataWriter.WriteValidData($"{droneSample}");
+                telemetryAnalyzer.DetectAccelerationAnomaly(
+                    droneSample.LinearAccelerationX,
+                    droneSample.LinearAccelerationY,
+                    droneSample.LinearAccelerationZ
+                );
+
+                telemetryAnalyzer.DetectWindSpikes(droneSample.WindSpeed, droneSample.WindAngle);
+
+                return new OperationResult(true, "");
             }
             catch (Exception ex)
             {
@@ -133,6 +147,7 @@ namespace Server.Services.Session
 
             sessionDisposed = true;
             sessionActive = false;
+            ++sessionCounter;
         }
 
     }

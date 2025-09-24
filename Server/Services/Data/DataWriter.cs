@@ -1,6 +1,6 @@
 ﻿using Common.Results;
 using Common.Services.Data;
-using Server.Exceptions;
+using Common.Exceptions;
 using System;
 using System.Configuration;
 using System.IO;
@@ -18,7 +18,7 @@ namespace Server.Services.Data
 
         private bool disposed = false;
 
-        public OperationResult Init()
+        public OperationResult Init(bool append)
         {
             try
             {
@@ -27,12 +27,12 @@ namespace Server.Services.Data
                     Directory.CreateDirectory(PROCESSED_DIR_PATH);
                 }
 
-                validWriter = new StreamWriter(Path.Combine(PROCESSED_DIR_PATH, VALID_FILE_NAME), append: false)
+                validWriter = new StreamWriter(Path.Combine(PROCESSED_DIR_PATH, VALID_FILE_NAME), append: append)
                 {
                     AutoFlush = true
                 };
 
-                rejectWriter = new StreamWriter(Path.Combine(PROCESSED_DIR_PATH, REJECT_FILE_NAME), append: false)
+                rejectWriter = new StreamWriter(Path.Combine(PROCESSED_DIR_PATH, REJECT_FILE_NAME), append: append)
                 {
                     AutoFlush = true
                 };

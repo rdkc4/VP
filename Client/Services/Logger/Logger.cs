@@ -14,17 +14,17 @@ namespace Client.Services.Log
 
         public Logger(string directory, string logFile, string eventFile, string leftoverFile)
         {
-            logger = new StreamWriter(Path.Combine(directory, logFile))
+            logger = new StreamWriter(Path.Combine(directory, logFile), append: true)
             {
                 AutoFlush = true
             };
 
-            eventLogger = new StreamWriter(Path.Combine(directory, eventFile))
+            eventLogger = new StreamWriter(Path.Combine(directory, eventFile), append: true)
             {
                 AutoFlush = true
             };
 
-            leftoverLogger = new StreamWriter(Path.Combine(directory, leftoverFile))
+            leftoverLogger = new StreamWriter(Path.Combine(directory, leftoverFile), append: true)
             {
                 AutoFlush = true
             };

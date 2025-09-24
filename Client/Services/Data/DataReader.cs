@@ -1,4 +1,4 @@
-﻿using Client.Exceptions;
+﻿using Common.Exceptions;
 using Common.Services.Data;
 using System;
 using System.IO;

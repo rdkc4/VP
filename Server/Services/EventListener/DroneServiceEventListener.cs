@@ -1,4 +1,6 @@
 ﻿using Common.Events;
+using Common.Events.Drone;
+using Common.Events.Session;
 using Common.Services.Session;
 using System;
 
@@ -17,43 +19,43 @@ namespace Server.Services.EventListener
             Attach();
         }
 
-        private void OnTransferStarted(object sender, TransferEventArgs e)
+        private void OnTransferStarted(object sender, SessionEventArgs e)
         {
             Console.WriteLine($"[Data Transfer]: {e.Message}");
             callback?.OnTransferStarted(e.Message);
         }
 
-        private void OnTransferCompleted(object sender, TransferEventArgs e)
+        private void OnTransferCompleted(object sender, SessionEventArgs e)
         {
             Console.WriteLine($"[Data Transfer]: {e.Message}");
             callback?.OnTransferCompleted(e.Message);
         }
 
-        private void OnSampleReceived(object sender, SampleReceivedEventArgs e)
+        private void OnSampleReceived(object sender, SessionEventArgs e)
         {
             Console.WriteLine($"[Sample Received]: {e.Message}");
             callback?.OnSampleReceived(e.Message);
         }
 
-        private void OnWarningRaised(object sender, WarningEventArgs e)
+        private void OnWarningRaised(object sender, SessionEventArgs e)
         {
             Console.WriteLine($"[Data Warning]: {e.Message}");
             callback?.OnWarningRaised(e.Message);
         }
 
-        private void OnAccelerationSpike(object sender, AccelerationSpikeEventArgs e)
+        private void OnAccelerationSpike(object sender, DroneEventArgs e)
         {
             Console.WriteLine($"[Data Warning]: {e.Message} - {e.Direction}");
             callback?.OnAccelerationSpike($"{e.Message} - {e.Direction}");
         }
 
-        private void OnOutOfBandWarning(object sender, OutOfBandWarningEventArgs e)
+        private void OnOutOfBandWarning(object sender, DroneEventArgs e)
         {
             Console.WriteLine($"[Data Warning]: {e.Message} - {e.Direction}");
             callback?.OnOutOfBandWarning($"{e.Message} - {e.Direction}");
         }
 
-        private void OnWindSpike(object sender, WindSpikeEventArgs e)
+        private void OnWindSpike(object sender, DroneEventArgs e)
         {
             Console.WriteLine($"[Data Warning]: {e.Message} - {e.Direction}");
             callback?.OnWindSpike($"{e.Message} - {e.Direction}");

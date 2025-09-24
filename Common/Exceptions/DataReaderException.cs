@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Client.Exceptions
+namespace Common.Exceptions
 {
-    internal class DataReaderException : Exception
+    public class DataReaderException : Exception
     {
         public DataReaderException() { }
         public DataReaderException(string message) : base(message) { }

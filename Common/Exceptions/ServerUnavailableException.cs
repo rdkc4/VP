@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Client.Exceptions
+namespace Common.Exceptions
 {
     public class ServerUnavailableException : Exception
     {

@@ -5,6 +5,6 @@ namespace Common.Services.Validator
 {
     public interface IDroneSampleValidator
     {
-        ValidationResult Validate(DroneSample droneSample);
+        void Validate(DroneSample droneSample);
     }
 }

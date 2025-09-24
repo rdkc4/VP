@@ -43,20 +43,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Events\AccelerationSpikeEventArgs.cs" />
-    <Compile Include="Events\OutOfBandWarningEventArgs.cs" />
-    <Compile Include="Events\SampleReceivedEventArgs.cs" />
-    <Compile Include="Events\TransferEventArgs.cs" />
-    <Compile Include="Events\WarningEventArgs.cs" />
-    <Compile Include="Events\WindSpikeEventArgs.cs" />
+    <Compile Include="Events\Drone\AccelerationSpikeEventArgs.cs" />
+    <Compile Include="Events\Drone\DroneEventArgs.cs" />
+    <Compile Include="Events\Drone\OutOfBandWarningEventArgs.cs" />
+    <Compile Include="Events\Session\SampleReceivedEventArgs.cs" />
+    <Compile Include="Events\Session\SessionEventArgs.cs" />
+    <Compile Include="Events\Session\TransferEventArgs.cs" />
+    <Compile Include="Events\Session\WarningEventArgs.cs" />
+    <Compile Include="Events\Drone\WindSpikeEventArgs.cs" />
+    <Compile Include="Exceptions\DataReaderException.cs" />
+    <Compile Include="Exceptions\DataWriterException.cs" />
+    <Compile Include="Exceptions\InvalidSampleException.cs" />
+    <Compile Include="Exceptions\ServerUnavailableException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Results\OperationResult.cs" />
-    <Compile Include="Results\ValidationResult.cs" />
     <Compile Include="Samples\DroneSample.cs" />
     <Compile Include="Services\Analyzer\ITelemetryAnalyzer.cs" />
     <Compile Include="Services\Data\IDataAssembler.cs" />
     <Compile Include="Services\Data\IDataReader.cs" />
     <Compile Include="Services\Data\IDataWriter.cs" />
+    <Compile Include="Services\EventHandlers\EventHandlers.cs" />
     <Compile Include="Services\Logger\ILogger.cs" />
     <Compile Include="Services\Session\IClientService.cs" />
     <Compile Include="Services\Session\IDroneEvents.cs" />
